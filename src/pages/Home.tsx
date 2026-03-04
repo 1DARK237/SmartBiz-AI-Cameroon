@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, PenTool, FileText, MessageSquare } from 'lucide-react';
+import { Sparkles, PenTool, FileText, MessageSquare, X } from 'lucide-react';
 
 interface UploadedImage {
   id: string;
@@ -10,6 +10,7 @@ interface UploadedImage {
 
 export default function Home() {
   const [portfolioImages, setPortfolioImages] = useState<UploadedImage[]>([]);
+  const [selectedImage, setSelectedImage] = useState<UploadedImage | null>(null);
 
   useEffect(() => {
     const savedImages = localStorage.getItem('smartbiz_images');
@@ -20,6 +21,17 @@ export default function Home() {
         console.error("Failed to parse images from local storage", e);
       }
     }
+  }, []);
+
+  // Close modal when pressing Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedImage(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   return (
@@ -93,13 +105,22 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {portfolioImages.map((img) => (
-                <div key={img.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 group hover:shadow-md transition-all">
-                  <div className="aspect-video w-full overflow-hidden bg-slate-100">
+                <div 
+                  key={img.id} 
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 group hover:shadow-md transition-all cursor-pointer"
+                  onClick={() => setSelectedImage(img)}
+                >
+                  <div className="aspect-video w-full overflow-hidden bg-slate-100 relative">
                     <img 
                       src={img.url} 
                       alt={img.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                      <span className="bg-white/90 text-slate-900 px-4 py-2 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-300">
+                        Click to expand
+                      </span>
+                    </div>
                   </div>
                   <div className="p-6">
                     <h3 className="font-semibold text-lg text-slate-900 mb-1">{img.title}</h3>
@@ -111,6 +132,39 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-sm"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full p-2 transition-all"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedImage(null);
+            }}
+          >
+            <X className="w-8 h-8" />
+          </button>
+          
+          <div 
+            className="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img 
+              src={selectedImage.url} 
+              alt={selectedImage.title} 
+              className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+            />
+            <div className="mt-4 text-center">
+              <h3 className="text-2xl font-bold text-white mb-1">{selectedImage.title}</h3>
+              <p className="text-slate-300">{new Date(selectedImage.date).toLocaleDateString()}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
