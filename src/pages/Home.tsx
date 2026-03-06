@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, PenTool, FileText, MessageSquare, X } from 'lucide-react';
+import { Sparkles, PenTool, FileText, MessageSquare, X, Play, Video } from 'lucide-react';
+import { motion } from 'motion/react';
 
 interface UploadedImage {
   id: string;
@@ -8,19 +9,33 @@ interface UploadedImage {
   date: string;
 }
 
+interface UploadedVideo {
+  id: string;
+  url: string;
+  title: string;
+  platform: string;
+  date: string;
+}
+
 export default function Home() {
   const [portfolioImages, setPortfolioImages] = useState<UploadedImage[]>([]);
+  const [socialVideos, setSocialVideos] = useState<UploadedVideo[]>([]);
   const [selectedImage, setSelectedImage] = useState<UploadedImage | null>(null);
 
   useEffect(() => {
-    const savedImages = localStorage.getItem('smartbiz_images');
-    if (savedImages) {
+    const fetchData = async () => {
       try {
-        setPortfolioImages(JSON.parse(savedImages));
+        const [imgRes, vidRes] = await Promise.all([
+          fetch('/api/images'),
+          fetch('/api/videos')
+        ]);
+        if (imgRes.ok) setPortfolioImages(await imgRes.json());
+        if (vidRes.ok) setSocialVideos(await vidRes.json());
       } catch (e) {
-        console.error("Failed to parse images from local storage", e);
+        console.error("Failed to fetch data from server", e);
       }
-    }
+    };
+    fetchData();
   }, []);
 
   // Close modal when pressing Escape key
@@ -39,21 +54,36 @@ export default function Home() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-emerald-900 to-slate-900 text-white py-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6"
+          >
             Empowering Cameroon's <br className="hidden md:block" />
             <span className="text-emerald-400">Small Businesses with AI</span>
-          </h1>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-10">
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-xl text-slate-300 max-w-2xl mx-auto mb-10"
+          >
             Simple, affordable AI solutions to create marketing content, design logos, and generate business plans in minutes.
-          </p>
-          <div className="flex justify-center gap-4">
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex justify-center gap-4"
+          >
             <button className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-full font-semibold transition-all shadow-lg shadow-emerald-500/30">
               Get Started
             </button>
             <button className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-full font-semibold backdrop-blur-sm transition-all">
               View Services
             </button>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -90,6 +120,58 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Social Media Videos Section (Dynamic from Admin) */}
+      {socialVideos.length > 0 && (
+        <section className="py-20 px-4 bg-slate-900 text-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
+                <Video className="w-8 h-8 text-blue-400" />
+                Learn with Us on Social Media
+              </h2>
+              <p className="text-slate-400 max-w-2xl mx-auto">Watch our latest tutorials and tips on how to use AI for your business.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {socialVideos.map((vid, index) => (
+                <motion.a
+                  href={vid.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key={vid.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  whileHover={{ y: -10 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="group relative bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden block shadow-xl"
+                >
+                  <div className="aspect-[9/16] w-full flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+                    {/* Platform background gradient */}
+                    <div className={`absolute inset-0 opacity-60 group-hover:opacity-80 transition-opacity duration-500 ${
+                      vid.platform === 'TikTok' ? 'bg-gradient-to-br from-cyan-500 to-pink-500' :
+                      vid.platform === 'Instagram' ? 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500' :
+                      vid.platform === 'YouTube' ? 'bg-gradient-to-br from-red-600 to-red-900' :
+                      'bg-gradient-to-br from-blue-500 to-blue-800'
+                    }`} />
+                    
+                    <div className="relative z-10 flex flex-col items-center">
+                      <div className="bg-white/20 backdrop-blur-md w-16 h-16 rounded-full flex items-center justify-center mb-6 border border-white/30 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                        <Play className="w-8 h-8 text-white ml-1" />
+                      </div>
+                      <h3 className="font-bold text-xl text-white mb-4 leading-tight drop-shadow-md">{vid.title}</h3>
+                      <span className="inline-block px-4 py-1.5 bg-black/30 backdrop-blur-md rounded-full text-sm text-white font-medium border border-white/10">
+                        Watch on {vid.platform}
+                      </span>
+                    </div>
+                  </div>
+                </motion.a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Portfolio Section (Dynamic from Admin) */}
       <section className="py-20 px-4 bg-slate-50">
         <div className="max-w-7xl mx-auto">
@@ -104,9 +186,13 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {portfolioImages.map((img) => (
-                <div 
+              {portfolioImages.map((img, index) => (
+                <motion.div 
                   key={img.id} 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
                   className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 group hover:shadow-md transition-all cursor-pointer"
                   onClick={() => setSelectedImage(img)}
                 >
@@ -126,7 +212,7 @@ export default function Home() {
                     <h3 className="font-semibold text-lg text-slate-900 mb-1">{img.title}</h3>
                     <p className="text-sm text-slate-500">{new Date(img.date).toLocaleDateString()}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}
@@ -149,7 +235,10 @@ export default function Home() {
             <X className="w-8 h-8" />
           </button>
           
-          <div 
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.2 }}
             className="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
@@ -162,7 +251,7 @@ export default function Home() {
               <h3 className="text-2xl font-bold text-white mb-1">{selectedImage.title}</h3>
               <p className="text-slate-300">{new Date(selectedImage.date).toLocaleDateString()}</p>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>

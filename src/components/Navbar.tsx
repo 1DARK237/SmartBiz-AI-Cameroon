@@ -16,7 +16,7 @@ export default function Navbar() {
                 2. Rename it to 'logo.jpg' OR change the src="/logo.jpg" below to match your file name.
               */}
               <img 
-                src="logo.jpg" 
+                src="/logo.jpg" 
                 alt="SmartBiz AI Logo" 
                 className="h-12 w-12 object-cover rounded-full shadow-sm border border-slate-100"
                 onError={(e) => {
