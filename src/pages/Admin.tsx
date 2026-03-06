@@ -70,8 +70,8 @@ export default function Admin() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError('File is too large. Please upload an image smaller than 5MB.');
+    if (file.size > 20 * 1024 * 1024) {
+      setError('File is too large. Please upload an image smaller than 20MB.');
       return;
     }
 
@@ -97,10 +97,11 @@ export default function Admin() {
           setUploadTitle('');
           if (fileInputRef.current) fileInputRef.current.value = '';
         } else {
-          setError('Failed to save image to server.');
+          const errData = await res.json().catch(() => ({}));
+          setError(`Failed to save image to server: ${errData.details || errData.error || res.statusText}`);
         }
       } catch (err) {
-        setError('Network error saving image.');
+        setError(`Network error saving image: ${err instanceof Error ? err.message : String(err)}`);
       }
     };
     reader.onerror = () => setError('Failed to read file.');
@@ -269,12 +270,17 @@ export default function Admin() {
               onDragOver={onDragOver}
               onDragLeave={onDragLeave}
               onDrop={onDrop}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={(e) => {
+                if (e.target !== fileInputRef.current) {
+                  fileInputRef.current?.click();
+                }
+              }}
             >
               <input 
                 type="file" 
                 ref={fileInputRef} 
                 onChange={handleFileInput} 
+                onClick={(e) => e.stopPropagation()}
                 accept="image/*" 
                 className="hidden" 
               />
@@ -282,7 +288,7 @@ export default function Admin() {
                 <Upload className="w-6 h-6 text-emerald-600" />
               </div>
               <p className="text-sm font-medium text-slate-900 mb-1">Click to upload or drag and drop</p>
-              <p className="text-xs text-slate-500">SVG, PNG, JPG or GIF (max. 5MB)</p>
+              <p className="text-xs text-slate-500">SVG, PNG, JPG or GIF (max. 20MB)</p>
             </div>
           </div>
         </div>

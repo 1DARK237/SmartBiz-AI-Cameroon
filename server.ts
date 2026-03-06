@@ -42,11 +42,15 @@ async function startServer() {
 
   app.post('/api/images', (req, res) => {
     try {
+      console.log('Received image upload request');
       const { id, url, title, date } = req.body;
+      console.log(`Image details: id=${id}, title=${title}, url length=${url?.length}`);
       db.prepare('INSERT INTO images (id, url, title, date) VALUES (?, ?, ?, ?)').run(id, url, title, date);
+      console.log('Image saved to database');
       res.json({ success: true });
     } catch (error) {
-      res.status(500).json({ error: 'Failed to save image' });
+      console.error('Error saving image:', error);
+      res.status(500).json({ error: 'Failed to save image', details: error instanceof Error ? error.message : String(error) });
     }
   });
 
