@@ -28,6 +28,12 @@ async function startServer() {
   // Increase payload limit for base64 images
   app.use(express.json({ limit: '50mb' }));
 
+  // Request logging
+  app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+  });
+
   // --- API ROUTES ---
 
   // Images
@@ -101,6 +107,10 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     app.use(express.static('dist'));
+    // SPA fallback
+    app.get('*', (req, res) => {
+      res.sendFile('dist/index.html', { root: '.' });
+    });
   }
 
   app.listen(PORT, '0.0.0.0', () => {

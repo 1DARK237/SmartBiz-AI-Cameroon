@@ -77,18 +77,18 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex justify-center gap-4"
           >
-            <button className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-full font-semibold transition-all shadow-lg shadow-emerald-500/30">
+            <a href="#contact" className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-full font-semibold transition-all shadow-lg shadow-emerald-500/30 inline-block">
               Get Started
-            </button>
-            <button className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-full font-semibold backdrop-blur-sm transition-all">
+            </a>
+            <a href="#services" className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-full font-semibold backdrop-blur-sm transition-all inline-block">
               View Services
-            </button>
+            </a>
           </motion.div>
         </div>
       </section>
 
       {/* Services Section */}
-      <section className="py-20 px-4 bg-white">
+      <section id="services" className="py-20 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Our AI Services</h2>
@@ -216,6 +216,24 @@ export default function Home() {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="py-20 px-4 bg-emerald-900 text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-6">Ready to Transform Your Business?</h2>
+          <p className="text-emerald-100 mb-10 text-lg">
+            Get in touch with us today to see how our AI solutions can help you save time, attract more customers, and grow your brand in Cameroon.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="mailto:contact@smartbiz.ai" className="bg-white text-emerald-900 hover:bg-emerald-50 px-8 py-3 rounded-full font-semibold transition-all shadow-lg inline-block">
+              Email Us
+            </a>
+            <a href="https://wa.me/237000000000" target="_blank" rel="noopener noreferrer" className="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500 px-8 py-3 rounded-full font-semibold transition-all shadow-lg inline-block">
+              Chat on WhatsApp
+            </a>
+          </div>
         </div>
       </section>
 

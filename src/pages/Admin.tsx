@@ -76,33 +76,69 @@ export default function Admin() {
     }
 
     const reader = new FileReader();
-    reader.onload = async (e) => {
-      const base64Url = e.target?.result as string;
-      
-      const newImage: UploadedImage = {
-        id: Math.random().toString(36).substring(2, 9),
-        url: base64Url,
-        title: uploadTitle.trim() || file.name.split('.')[0],
-        date: new Date().toISOString(),
-      };
-
-      try {
-        const res = await fetch('/api/images', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newImage)
-        });
-        if (res.ok) {
-          setImages(prev => [newImage, ...prev]);
-          setUploadTitle('');
-          if (fileInputRef.current) fileInputRef.current.value = '';
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Max dimensions
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 1200;
+        
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
         } else {
-          const errData = await res.json().catch(() => ({}));
-          setError(`Failed to save image to server: ${errData.details || errData.error || res.statusText}`);
+          if (height > MAX_HEIGHT) {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
         }
-      } catch (err) {
-        setError(`Network error saving image: ${err instanceof Error ? err.message : String(err)}`);
-      }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          setError('Failed to process image.');
+          return;
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        // Compress to JPEG with 0.8 quality to keep it under 1MB
+        const base64Url = canvas.toDataURL('image/jpeg', 0.8);
+        
+        const newImage: UploadedImage = {
+          id: Math.random().toString(36).substring(2, 9),
+          url: base64Url,
+          title: uploadTitle.trim() || file.name.split('.')[0],
+          date: new Date().toISOString(),
+        };
+
+        try {
+          const res = await fetch('/api/images', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newImage)
+          });
+          if (res.ok) {
+            setImages(prev => [newImage, ...prev]);
+            setUploadTitle('');
+            if (fileInputRef.current) fileInputRef.current.value = '';
+          } else {
+            const text = await res.text();
+            console.error('Image upload failed:', res.status, text);
+            setError(`Failed to save image to server. Status: ${res.status}. ${text.substring(0, 100)}`);
+          }
+        } catch (err) {
+          setError(`Network error saving image: ${err instanceof Error ? err.message : String(err)}`);
+        }
+      };
+      img.onerror = () => setError('Failed to load image.');
+      img.src = e.target?.result as string;
     };
     reader.onerror = () => setError('Failed to read file.');
     reader.readAsDataURL(file);
@@ -134,10 +170,13 @@ export default function Admin() {
         setVideoTitle('');
         setVideoUrl('');
       } else {
-        setError('Failed to save video to server.');
+        const errText = await res.text();
+        console.error('Video upload failed:', res.status, errText);
+        setError(`Failed to save video to server. Status: ${res.status}. ${errText}`);
       }
     } catch (err) {
-      setError('Network error saving video.');
+      console.error('Network error saving video:', err);
+      setError(`Network error saving video: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
