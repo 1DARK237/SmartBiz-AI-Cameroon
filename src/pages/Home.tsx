@@ -227,10 +227,10 @@ export default function Home() {
             Get in touch with us today to see how our AI solutions can help you save time, attract more customers, and grow your brand in Cameroon.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="mailto:contact@smartbiz.ai" className="bg-white text-emerald-900 hover:bg-emerald-50 px-8 py-3 rounded-full font-semibold transition-all shadow-lg inline-block">
+            <a href="njison50@gmail.com" className="bg-white text-emerald-900 hover:bg-emerald-50 px-8 py-3 rounded-full font-semibold transition-all shadow-lg inline-block">
               Email Us
             </a>
-            <a href="https://wa.me/237000000000" target="_blank" rel="noopener noreferrer" className="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500 px-8 py-3 rounded-full font-semibold transition-all shadow-lg inline-block">
+            <a href="https://wa.me/237675450486" target="_blank" rel="noopener noreferrer" className="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500 px-8 py-3 rounded-full font-semibold transition-all shadow-lg inline-block">
               Chat on WhatsApp
             </a>
           </div>
